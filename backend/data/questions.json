@@ -1,0 +1,154 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Explain how a HashMap works internally in Java.",
+      "category": "Data Structures",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 2,
+      "question": "What is the difference between ArrayList and LinkedList in Java?",
+      "category": "Data Structures",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 3,
+      "question": "How does garbage collection work in Java?",
+      "category": "Backend",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 4,
+      "question": "Explain the difference between process and thread.",
+      "category": "OS",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 5,
+      "question": "What is database indexing and how does it improve query performance?",
+      "category": "DBMS",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 6,
+      "question": "Design a URL shortener service like bit.ly.",
+      "category": "System Design",
+      "difficulty": "Hard"
+    },
+    {
+      "id": 7,
+      "question": "Explain the CAP theorem and its implications for distributed systems.",
+      "category": "System Design",
+      "difficulty": "Hard"
+    },
+    {
+      "id": 8,
+      "question": "What is the difference between SQL and NoSQL databases?",
+      "category": "DBMS",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 9,
+      "question": "How does REST API work and what are its main principles?",
+      "category": "Backend",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 10,
+      "question": "Explain the concept of virtual memory in operating systems.",
+      "category": "OS",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 11,
+      "question": "What is microservices architecture and its advantages?",
+      "category": "System Design",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 12,
+      "question": "How does AWS Lambda work and when would you use it?",
+      "category": "Cloud",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 13,
+      "question": "Explain the difference between TCP and UDP protocols.",
+      "category": "Backend",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 14,
+      "question": "What is database normalization and why is it important?",
+      "category": "DBMS",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 15,
+      "question": "How would you implement a load balancer for a web application?",
+      "category": "System Design",
+      "difficulty": "Hard"
+    },
+    {
+      "id": 16,
+      "question": "Explain the difference between authentication and authorization.",
+      "category": "Backend",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 17,
+      "question": "What is containerization and how does Docker work?",
+      "category": "Cloud",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 18,
+      "question": "How does a binary search tree work and what are its time complexities?",
+      "category": "Data Structures",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 19,
+      "question": "What is deadlocks in operating systems and how can they be prevented?",
+      "category": "OS",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 20,
+      "question": "Design a chat application like WhatsApp.",
+      "category": "System Design",
+      "difficulty": "Hard"
+    },
+    {
+      "id": 21,
+      "question": "What is the difference between NoSQL document databases and key-value stores?",
+      "category": "DBMS",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 22,
+      "question": "How does Kubernetes orchestrate containers?",
+      "category": "Cloud",
+      "difficulty": "Hard"
+    },
+    {
+      "id": 23,
+      "question": "Explain the concept of caching strategies in web applications.",
+      "category": "Backend",
+      "difficulty": "Medium"
+    },
+    {
+      "id": 24,
+      "question": "What is the difference between synchronous and asynchronous programming?",
+      "category": "Backend",
+      "difficulty": "Easy"
+    },
+    {
+      "id": 25,
+      "question": "How would you design a rate limiter for an API?",
+      "category": "System Design",
+      "difficulty": "Hard"
+    }
+  ]
+}

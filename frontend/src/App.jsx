@@ -6,6 +6,8 @@ import Feedback from './components/Feedback';
 
 function App() {
   const [question, setQuestion] = useState('');
+  const [category, setCategory] = useState('');
+  const [difficulty, setDifficulty] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
@@ -18,8 +20,10 @@ function App() {
   const fetchQuestion = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/question');
+      const response = await axios.get('/api/question');
       setQuestion(response.data.question);
+      setCategory(response.data.category);
+      setDifficulty(response.data.difficulty);
       setError('');
     } catch (err) {
       setError('Failed to load question. Please refresh the page.');
@@ -132,10 +136,14 @@ function App() {
                 </p>
                 <div className="mt-4 flex items-center space-x-4 text-sm text-gray-600">
                   <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full font-medium">
-                    Data Structures
+                    {category}
                   </span>
-                  <span className="bg-warning-100 text-warning-700 px-3 py-1 rounded-full font-medium">
-                    Medium Difficulty
+                  <span className={`px-3 py-1 rounded-full font-medium ${
+                    difficulty === 'Easy' ? 'bg-success-100 text-success-700' :
+                    difficulty === 'Medium' ? 'bg-warning-100 text-warning-700' :
+                    'bg-danger-100 text-danger-700'
+                  }`}>
+                    {difficulty} Difficulty
                   </span>
                 </div>
               </div>

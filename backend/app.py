@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import logging
@@ -8,6 +8,7 @@ import os
 from services.transcription import TranscriptionService
 from services.scoring import ScoringService
 from services.feedback import FeedbackService
+from services.question_service import QuestionService
 from utils.audio_utils import process_audio_file, cleanup_temp_file
 
 # Configure logging
@@ -34,6 +35,7 @@ app.add_middleware(
 transcription_service = TranscriptionService()
 scoring_service = ScoringService()
 feedback_service = FeedbackService()
+question_service = QuestionService()
 
 # Sample interview question
 INTERVIEW_QUESTION = "Explain how a HashMap works internally in Java."
@@ -51,14 +53,59 @@ async def root():
         }
     }
 
+@app.get("/api/question")
+async def get_random_question(
+    category: str = Query(None, description="Filter by category"),
+    difficulty: str = Query(None, description="Filter by difficulty")
+):
+    """Get a random interview question, optionally filtered by category and difficulty."""
+    try:
+        question = question_service.get_random_question(category, difficulty)
+        
+        if not question:
+            raise HTTPException(
+                status_code=404, 
+                detail="No questions found matching the criteria"
+            )
+        
+        return {
+            "question": question["question"],
+            "category": question["category"],
+            "difficulty": question["difficulty"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching question: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch question")
+
 @app.get("/question")
 async def get_question():
-    """Get the interview question."""
-    return {
-        "question": INTERVIEW_QUESTION,
-        "category": "Data Structures",
-        "difficulty": "Medium"
-    }
+    """Get the interview question (legacy endpoint for backward compatibility)."""
+    try:
+        question = question_service.get_random_question()
+        
+        if not question:
+            # Fallback to hardcoded question if service fails
+            return {
+                "question": "Explain how a HashMap works internally in Java.",
+                "category": "Data Structures",
+                "difficulty": "Medium"
+            }
+        
+        return {
+            "question": question["question"],
+            "category": question["category"],
+            "difficulty": question["difficulty"]
+        }
+    except Exception as e:
+        logger.error(f"Error fetching question: {str(e)}")
+        # Fallback to hardcoded question
+        return {
+            "question": "Explain how a HashMap works internally in Java.",
+            "category": "Data Structures",
+            "difficulty": "Medium"
+        }
 
 @app.get("/health")
 async def health_check():
