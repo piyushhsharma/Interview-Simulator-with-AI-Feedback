@@ -1,15 +1,20 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import logging
 import tempfile
 import os
+import uuid
 
 from services.transcription import TranscriptionService
 from services.scoring import ScoringService
 from services.feedback import FeedbackService
 from services.question_service import QuestionService
+from services.enhanced_evaluation_service import EnhancedEvaluationService
 from utils.audio_utils import process_audio_file, cleanup_temp_file
+from database.database_manager import DatabaseManager
+from models.question import Question
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +41,17 @@ transcription_service = TranscriptionService()
 scoring_service = ScoringService()
 feedback_service = FeedbackService()
 question_service = QuestionService()
+enhanced_evaluation_service = EnhancedEvaluationService()
+db_manager = DatabaseManager()
+
+# Pydantic models for API
+class SessionRequest(BaseModel):
+    total_questions: int = 3
+
+class TextAnswerRequest(BaseModel):
+    session_id: str
+    question_id: int
+    answer_text: str
 
 # Sample interview question
 INTERVIEW_QUESTION = "Explain how a HashMap works internally in Java."
@@ -113,12 +129,14 @@ async def health_check():
     return {"status": "healthy", "services": "running"}
 
 @app.post("/evaluate")
-async def evaluate_answer(audio: UploadFile = File(...)):
+async def evaluate_answer(audio: UploadFile = File(...), session_id: str = None, question_id: int = None):
     """
     Evaluate interview answer from audio file.
     
     Args:
         audio: Audio file containing the interview answer
+        session_id: Optional session ID for tracking
+        question_id: Optional question ID for rubric-based evaluation
         
     Returns:
         Complete feedback with transcript, scores, and suggestions
@@ -148,15 +166,40 @@ async def evaluate_answer(audio: UploadFile = File(...)):
         if len(transcript.strip()) < 10:
             raise HTTPException(status_code=400, detail="Transcript too short - please speak more clearly")
         
-        # Calculate scores
-        scores_data = scoring_service.calculate_all_scores(transcript)
+        # Get question data if question_id provided
+        question = None
+        if question_id:
+            question_data = question_service.get_question_by_id(question_id)
+            if question_data:
+                question = Question.from_dict(question_data)
         
-        # Generate complete feedback
-        feedback = feedback_service.generate_complete_feedback(transcript, scores_data)
+        # Create answer record
+        answer = Answer(
+            session_id=session_id,
+            question_id=question_id,
+            transcript=transcript
+        )
         
-        logger.info(f"Successfully evaluated answer: {len(transcript)} characters transcribed")
+        # Store answer in database
+        if not db_manager.create_answer(answer):
+            logger.warning("Failed to store answer in database")
         
-        return JSONResponse(content=feedback)
+        # Enhanced evaluation
+        evaluation = enhanced_evaluation_service.evaluate_answer(answer, question, temp_audio_path)
+        
+        # Store evaluation result
+        if not db_manager.create_evaluation_result(evaluation):
+            logger.warning("Failed to store evaluation result in database")
+        
+        # Update session if provided
+        if session_id:
+            session = db_manager.get_session(session_id)
+            if session:
+                session.completed_questions += 1
+                db_manager.update_session(session)
+        
+        # Return enhanced feedback
+        return JSONResponse(content=evaluation.to_dict())
         
     except HTTPException:
         raise
@@ -168,6 +211,88 @@ async def evaluate_answer(audio: UploadFile = File(...)):
         # Clean up temporary files
         if temp_audio_path:
             cleanup_temp_file(temp_audio_path)
+
+# Session management endpoints
+@app.post("/api/session/create")
+async def create_session(request: SessionRequest):
+    """Create a new interview session."""
+    try:
+        from models.interview_session import InterviewSession
+        session = InterviewSession(total_questions=request.total_questions)
+        
+        if db_manager.create_session(session):
+            return {"session_id": session.session_id, "total_questions": session.total_questions}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to create session")
+    except Exception as e:
+        logger.error(f"Session creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create session")
+
+@app.get("/api/session/{session_id}")
+async def get_session(session_id: str):
+    """Get session details."""
+    try:
+        session = db_manager.get_session(session_id)
+        if session:
+            return session.to_dict()
+        else:
+            raise HTTPException(status_code=404, detail="Session not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get session: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get session")
+
+@app.post("/api/evaluate/text")
+async def evaluate_text_answer(request: TextAnswerRequest):
+    """Evaluate text-based answer (fallback for audio issues)."""
+    try:
+        # Get question data
+        question = None
+        question_data = question_service.get_question_by_id(request.question_id)
+        if question_data:
+            question = Question.from_dict(question_data)
+        
+        # Create answer record
+        from models.answer import Answer
+        answer = Answer(
+            session_id=request.session_id,
+            question_id=request.question_id,
+            transcript=request.answer_text
+        )
+        
+        # Store answer in database
+        if not db_manager.create_answer(answer):
+            logger.warning("Failed to store answer in database")
+        
+        # Enhanced evaluation (without audio)
+        evaluation = enhanced_evaluation_service.evaluate_answer(answer, question)
+        
+        # Store evaluation result
+        if not db_manager.create_evaluation_result(evaluation):
+            logger.warning("Failed to store evaluation result in database")
+        
+        # Update session
+        session = db_manager.get_session(request.session_id)
+        if session:
+            session.completed_questions += 1
+            db_manager.update_session(session)
+        
+        return JSONResponse(content=evaluation.to_dict())
+        
+    except Exception as e:
+        logger.error(f"Text evaluation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Evaluation failed")
+
+@app.get("/api/history")
+async def get_history(limit: int = 10):
+    """Get interview session history."""
+    try:
+        history = db_manager.get_session_history(limit)
+        return {"history": history}
+    except Exception as e:
+        logger.error(f"Failed to get history: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get history")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

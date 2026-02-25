@@ -23,6 +23,21 @@ class QuestionService:
             logger.error(f"Failed to load questions: {str(e)}")
             self.questions = []
     
+    def get_question_by_id(self, question_id: int) -> Optional[Dict]:
+        """
+        Get a specific question by ID.
+        
+        Args:
+            question_id: The ID of the question to retrieve
+            
+        Returns:
+            Question dictionary or None if not found
+        """
+        for question in self.questions:
+            if question.get('id') == question_id:
+                return question
+        return None
+    
     def get_random_question(self, category: Optional[str] = None, difficulty: Optional[str] = None) -> Optional[Dict]:
         """
         Get a random question, optionally filtered by category and/or difficulty.

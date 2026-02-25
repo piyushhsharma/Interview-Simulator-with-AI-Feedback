@@ -4,49 +4,81 @@
       "id": 1,
       "question": "Explain how a HashMap works internally in Java.",
       "category": "Data Structures",
-      "difficulty": "Medium"
+      "difficulty": "Medium",
+      "must_have_concepts": ["hash function", "bucket", "collision", "array", "hashcode", "equals"],
+      "good_to_have_concepts": ["load factor", "resize", "rehash", "time complexity", "O(1)", "chaining", "linked list"],
+      "red_flags": ["HashMap is always O(1)", "no collision handling", "fixed size"],
+      "ideal_answer": "A HashMap in Java is a data structure that stores key-value pairs using an array of buckets internally. When you insert a key-value pair, the key's hashcode is computed and then reduced to an array index using a hash function. The value is stored in the bucket at that index. If multiple keys hash to the same bucket (collision), Java uses chaining - each bucket contains a linked list of entries. When the number of entries exceeds the load factor threshold (default 0.75), the hashmap resizes and rehashes all entries. The time complexity is O(1) on average for get/put operations, but can degrade to O(n) in worst case with poor hash distribution."
     },
     {
       "id": 2,
       "question": "What is the difference between ArrayList and LinkedList in Java?",
       "category": "Data Structures",
-      "difficulty": "Easy"
+      "difficulty": "Easy",
+      "must_have_concepts": ["array", "linked list", "memory", "performance"],
+      "good_to_have_concepts": ["random access", "sequential access", "insertion", "deletion", "time complexity"],
+      "red_flags": ["same performance", "no memory difference"],
+      "ideal_answer": "ArrayList uses a dynamic array internally, while LinkedList uses a doubly-linked list. ArrayList provides O(1) random access but O(n) insertion/deletion in the middle as it needs to shift elements. LinkedList provides O(1) insertion/deletion but O(n) random access as it needs to traverse. ArrayList is more memory efficient as it stores only data, while LinkedList stores additional pointers for each element. ArrayList is generally better for random access operations, while LinkedList is better for frequent insertions/deletions."
     },
     {
       "id": 3,
       "question": "How does garbage collection work in Java?",
       "category": "Backend",
-      "difficulty": "Medium"
+      "difficulty": "Medium",
+      "must_have_concepts": ["automatic memory management", "heap", "garbage collector", "unreachable objects"],
+      "good_to_have_concepts": ["generational garbage collection", "mark and sweep", "finalize", "System.gc", "memory leaks"],
+      "red_flags": ["manual garbage collection", "immediate cleanup", "no memory leaks"],
+      "ideal_answer": "Java's garbage collector automatically manages memory by identifying and removing objects that are no longer referenced. The GC runs in the background and uses a generational approach - objects are divided into young and old generations. New objects start in the young generation, and most die quickly. The GC uses mark-and-sweep algorithms to identify unreachable objects. When memory is low, the GC runs, marking all reachable objects and sweeping away the rest. Developers can suggest garbage collection with System.gc(), but the JVM decides when to actually run it."
     },
     {
       "id": 4,
       "question": "Explain the difference between process and thread.",
       "category": "OS",
-      "difficulty": "Easy"
+      "difficulty": "Easy",
+      "must_have_concepts": ["process", "thread", "memory", "execution"],
+      "good_to_have_concepts": ["independent memory space", "shared memory", "context switching", "multitasking"],
+      "red_flags": ["same thing", "no difference", "threads have separate memory"],
+      "ideal_answer": "A process is an independent program with its own memory space, while a thread is a lightweight execution unit within a process. Processes don't share memory by default and communicate through inter-process communication. Threads within the same process share the same memory space and resources. Process creation is expensive and requires separate memory allocation, while thread creation is lightweight. Context switching between processes is more expensive than between threads. Multiple processes provide isolation and stability, while multiple threads provide better performance for concurrent tasks."
     },
     {
       "id": 5,
       "question": "What is database indexing and how does it improve query performance?",
       "category": "DBMS",
-      "difficulty": "Medium"
+      "difficulty": "Medium",
+      "must_have_concepts": ["index", "query performance", "lookup", "data structure"],
+      "good_to_have_concepts": ["B-tree", "binary search", "read performance", "write overhead", "primary key"],
+      "red_flags": ["always improves performance", "no downsides", "instant queries"],
+      "ideal_answer": "Database indexing is a data structure technique that improves the speed of data retrieval operations. Indexes are created using columns frequently used in WHERE clauses. Most databases use B-tree indexes, which store sorted data allowing binary search instead of full table scans. Indexes dramatically improve read performance, turning O(n) operations into O(log n). However, they have overhead - write operations (INSERT, UPDATE, DELETE) are slower because the index must be updated. Indexes also consume additional storage space. The key is balancing read performance gains against write performance costs."
     },
     {
       "id": 6,
       "question": "Design a URL shortener service like bit.ly.",
       "category": "System Design",
-      "difficulty": "Hard"
+      "difficulty": "Hard",
+      "must_have_concepts": ["hashing", "database", "redirect", "URL mapping"],
+      "good_to_have_concepts": ["base62 encoding", "caching", "load balancing", "analytics", "expiration"],
+      "red_flags": ["sequential IDs", "no collision handling", "single server"],
+      "ideal_answer": "A URL shortener service needs to map long URLs to short codes and handle redirects. The system would have: 1) A service to generate short codes using base62 encoding of hash values or sequential IDs, 2) A distributed database to store URL mappings, 3) A caching layer for frequently accessed URLs, 4) Load balancers for scalability, 5) Analytics tracking for click counts. When a user submits a long URL, we generate a unique short code and store the mapping. When someone accesses the short URL, we look up the original URL and redirect them. Key considerations include handling collisions, ensuring high availability, and managing expiration of unused URLs."
     },
     {
       "id": 7,
       "question": "Explain the CAP theorem and its implications for distributed systems.",
       "category": "System Design",
-      "difficulty": "Hard"
+      "difficulty": "Hard",
+      "must_have_concepts": ["consistency", "availability", "partition tolerance", "trade-offs"],
+      "good_to_have_concepts": ["network partitions", "distributed databases", "CA systems", "CP systems", "AP systems"],
+      "red_flags": ["can have all three", "CAP is optional", "no trade-offs needed"],
+      "ideal_answer": "The CAP theorem states that a distributed system can only provide two out of three guarantees: Consistency (all nodes see the same data), Availability (system remains operational), and Partition Tolerance (system continues working despite network failures). In real-world systems, network partitions are inevitable, so we must choose between Consistency and Availability. CP systems prioritize consistency over availability during partitions (like traditional databases). AP systems prioritize availability over consistency (like many NoSQL databases). The choice depends on business requirements - financial systems typically choose CP, social media platforms often choose AP."
     },
     {
       "id": 8,
       "question": "What is the difference between SQL and NoSQL databases?",
       "category": "DBMS",
-      "difficulty": "Easy"
+      "difficulty": "Easy",
+      "must_have_concepts": ["relational", "schema", "structured data", "unstructured data"],
+      "good_to_have_concepts": ["ACID properties", "scalability", "flexibility", "joins", "horizontal scaling"],
+      "red_flags": ["same thing", "one is always better", "no use cases"],
+      "ideal_answer": "SQL databases are relational with predefined schemas, structured data, and support complex queries with joins. They follow ACID properties and are good for structured data with relationships. NoSQL databases are non-relational with flexible schemas, handle unstructured data well, and scale horizontally. They include document stores, key-value stores, column-family stores, and graph databases. SQL is better for transactional applications with complex relationships, while NoSQL excels at big data, real-time applications, and when schema flexibility is needed."
     },
     {
       "id": 9,
